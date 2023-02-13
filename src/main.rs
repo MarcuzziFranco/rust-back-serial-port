@@ -1,30 +1,28 @@
-use salvo::prelude::*;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
-#[tokio::main]
-async fn main() {
-    //let router = Router::new().get(rust_server);
-
-    let router = Router::with_path("serial-data")
-        .get(status_server)
-        .push(Router::with_path("create-connection").get(create_connection))
-        .push(Router::with_path("ports").get(port_usb_active));
-
-    Server::new(TcpListener::bind("127.0.0.1:7878"))
-        .serve(router)
-        .await;
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(echo)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
 
-#[handler]
-async fn status_server() -> &'static str {
-    "Server rust is life"
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
 }
 
-#[handler]
-async fn port_usb_active() -> &'static str {
-    "Port usb active"
+#[post("/echo")]
+async fn echo(req_body: String) -> impl Responder {
+    HttpResponse::Ok().body(req_body)
 }
 
-#[handler]
-async fn create_connection() -> &'static str {
-    "Connection created"
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
 }
