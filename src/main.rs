@@ -43,8 +43,14 @@ async fn ping() -> impl Responder {
 }
 
 async fn ports_usb(req: HttpRequest) -> impl Responder {
-    let ports = "COM04";
-    format!("{}", ports)
+    let ports = serialport::available_ports().expect("No ports founds");
+    let mut vec_pors_names:Vec<String> = Vec::new();
+
+    for p in ports {
+       // println!("{}",p.port_name);
+        vec_pors_names.push(p.port_name);
+    }
+    return web::Json(vec_pors_names);
 }
 
 #[post("/echo")]
