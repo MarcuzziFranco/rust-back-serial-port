@@ -1,7 +1,11 @@
+mod models;
+use models::model_response_ports::ResponsePorts;
+
 use actix_web::{http,get,post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use std::time::SystemTime;
 use actix_cors::Cors;
 use chrono::{DateTime, Utc};
+
 
 
 #[actix_web::main]
@@ -44,13 +48,18 @@ async fn ping() -> impl Responder {
 
 async fn ports_usb(req: HttpRequest) -> impl Responder {
     let ports = serialport::available_ports().expect("No ports founds");
-    let mut vec_pors_names:Vec<String> = Vec::new();
-
+    let mut response_ports = ResponsePorts {
+        ports_names: Vec::new(),
+    };
+    
+    
     for p in ports {
-       // println!("{}",p.port_name);
-        vec_pors_names.push(p.port_name);
+        // println!("{}",p.port_name);
+        response_ports.ports_names.push(p.port_name)
     }
-    return web::Json(vec_pors_names);
+    
+    
+    return web::Json(response_ports)
 }
 
 #[post("/echo")]
